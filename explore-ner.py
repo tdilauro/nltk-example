@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 
@@ -31,22 +33,22 @@ for i,doc in enumerate(docs):
   sentences = sent_tokenize(doc)
   for j,s in enumerate(sentences):
     toks = word_tokenize(s)
-    print " >> " + s
+    print(" >> " + s)
     #for t in toks: 
-    #  print "      - " + t
+    #  print("      - " + t)
     sentences[j] = toks
   tagged = nltk.pos_tag_sents(sentences)
-  #print tagged
+  #print(tagged)
   named_entities = nltk.ne_chunk_sents(tagged)
 
-  print " ** NLTK NER ** " 
+  print(" ** NLTK NER ** ")
   ner = {}
   for stree in named_entities:
     for subtree in stree.subtrees(filter=lambda t: len(t.label()) > 0):
       type = subtree.label()
       if type != 'S': 
         name = " ".join(c[0] for c in subtree.leaves())
-        #print str(type) + ": " + name
+        #print(str(type) + ": " + name)
         try:
           ner[ str(type) + ": " + name ] += 1
         except:
@@ -60,7 +62,7 @@ for i,doc in enumerate(docs):
     if m is not None:
       t = m.group(1)
       v = m.group(2)
-    print "   ", ner[w], w, " TYPE: ", t, "  ", v
+    print("   ", ner[w], w, " TYPE: ", t, "  ", v)
     if t == "LOCATION":
       mylocation = v
     if mylocation == '' and topgspgpe == '' and (t == 'GSP' or t == 'GPE'):
@@ -69,4 +71,4 @@ for i,doc in enumerate(docs):
     mylocation = topgspgpe
     if mylocation == '':
       mylocation = 'undetected'
-  print "LOCATION: ", mylocation
+  print("LOCATION: ", mylocation)

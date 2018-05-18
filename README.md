@@ -1,5 +1,6 @@
 ### Tested
 - Python 2.7.14
+- Python 3.6.4
 
 ### Setup
 

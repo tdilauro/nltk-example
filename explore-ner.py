@@ -1,5 +1,4 @@
-from nltk import batch_ne_chunk, tree
-from nltk.tag import batch_pos_tag
+import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 
 import json
@@ -36,15 +35,15 @@ for i,doc in enumerate(docs):
     #for t in toks: 
     #  print "      - " + t
     sentences[j] = toks
-  tagged = batch_pos_tag(sentences)
+  tagged = nltk.pos_tag_sents(sentences)
   #print tagged
-  named_entities = batch_ne_chunk(tagged)
+  named_entities = nltk.ne_chunk_sents(tagged)
 
   print " ** NLTK NER ** " 
   ner = {}
   for stree in named_entities:
-    for subtree in stree.subtrees(filter=lambda t: len(t.node) > 0):
-      type = subtree.node
+    for subtree in stree.subtrees(filter=lambda t: len(t.label()) > 0):
+      type = subtree.label()
       if type != 'S': 
         name = " ".join(c[0] for c in subtree.leaves())
         #print str(type) + ": " + name

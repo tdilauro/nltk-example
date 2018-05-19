@@ -21,11 +21,11 @@ def main():
     filename = args.filename
     specific_record = args.record
 
+    documents = json_objects_from_file(filename)
 
-    docs, doc_ids = load_articles(filename)
-
-    for i,doc in enumerate(docs):
-        sentences = sent_tokenize(doc)
+    for i, doc in enumerate(documents):
+        content = doc['content']
+        sentences = sent_tokenize(content)
         for j,s in enumerate(sentences):
             toks = word_tokenize(s)
             print(" >> " + s)
@@ -72,16 +72,10 @@ def main():
 def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
 
 
-def load_articles(filename):
-    document_contents = []
-    doc_ids = []
-
-    with open(filename, 'rb') as json_data:
-        #jd = json.load(json_data)
-        for row in ijson.items(json_data, 'item'):
-            doc_ids.append(row['identifier'])
-            document_contents.append(row['content'])
-    return document_contents, doc_ids
+def json_objects_from_file(filename):
+    with open(filename, 'rb') as f:
+        for obj in ijson.items(f, 'item'):
+            yield obj
 
 
 if __name__ == '__main__':

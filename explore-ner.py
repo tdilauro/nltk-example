@@ -3,16 +3,21 @@ from __future__ import print_function
 import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 
+import argparse
 import json
 import re
-import sys
 
-filename = 'articles.json'
-specific_record = None
-if len(sys.argv) > 1:
-    filename = sys.argv[1]
-if len(sys.argv) > 2:
-    specific_record = sys.argv[2]
+
+DEFAULT_FILENAME = 'articles.json'
+DEFAULT_RECORD = None
+
+parser = argparse.ArgumentParser()
+parser.add_argument('filename', default=DEFAULT_FILENAME, nargs='?', help='echo the string you use here')
+parser.add_argument('record', default=DEFAULT_RECORD, nargs='?', help='record number (all, if omitted)')
+args = parser.parse_args()
+
+filename = args.filename
+specific_record = args.record
 
 def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
 

@@ -5,6 +5,7 @@
 ### Setup
 
 Required packages
+- ijson (2.3)
 - nltk (3.3)
 - numpy (1.14.3)
 

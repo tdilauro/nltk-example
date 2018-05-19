@@ -4,7 +4,7 @@ import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 
 import argparse
-import json
+import ijson
 import re
 
 
@@ -76,9 +76,9 @@ def load_articles(filename):
     document_contents = []
     doc_ids = []
 
-    with open(filename) as json_data:
-        jd = json.load(json_data)
-        for row in jd:
+    with open(filename, 'rb') as json_data:
+        #jd = json.load(json_data)
+        for row in ijson.items(json_data, 'item'):
             doc_ids.append(row['identifier'])
             document_contents.append(row['content'])
     return document_contents, doc_ids

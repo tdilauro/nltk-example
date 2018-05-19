@@ -5,7 +5,6 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 
 import argparse
 import ijson
-import re
 
 
 DEFAULT_FILENAME = 'articles.json'
@@ -25,51 +24,49 @@ def main():
 
     for i, doc in enumerate(documents):
         content = doc['content']
-        sentences = sent_tokenize(content)
-        for j,s in enumerate(sentences):
-            toks = word_tokenize(s)
-            print(" >> " + s)
-            #for t in toks:
-            #  print("      - " + t)
-            sentences[j] = toks
-        tagged = nltk.pos_tag_sents(sentences)
-        #print(tagged)
-        named_entities = nltk.ne_chunk_sents(tagged)
-
-        print(" ** NLTK NER ** ")
-        ner = {}
-        for stree in named_entities:
-            for subtree in stree.subtrees(filter=lambda t: len(t.label()) > 0):
-                type = subtree.label()
-                if type != 'S':
-                    name = " ".join(c[0] for c in subtree.leaves())
-                    #print(str(type) + ": " + name)
-                    try:
-                        ner[ str(type) + ": " + name ] += 1
-                    except:
-                        ner[ str(type) + ": " + name ] = 1
-        mylocation = ''
-        topgspgpe = ''
-        for w in sorted(ner, key=ner.get, reverse=True):
-            if ner[w] < 2:
-                break
-            m = re.search('^(\w+):\s+(.+)', w)
-            if m is not None:
-                t = m.group(1)
-                v = m.group(2)
-            print("   ", ner[w], w, " TYPE: ", t, "  ", v)
-            if t == "LOCATION":
-                mylocation = v
-            if mylocation == '' and topgspgpe == '' and (t == 'GSP' or t == 'GPE'):
-                topgspgpe = v
-        if mylocation == '':
-            mylocation = topgspgpe
-            if mylocation == '':
-                mylocation = 'undetected'
-        print("LOCATION: ", mylocation)
+        do_ner(content)
 
 
 def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
+
+
+NLTK_TREE_SENTENCE_LABEL = 'S'
+
+def do_ner(content):
+    sentences = sent_tokenize(content)
+    tokenized_sentences = [word_tokenize(s) for s in sentences]
+    tagged_sentences = nltk.pos_tag_sents(tokenized_sentences)
+    named_entities = nltk.ne_chunk_sents(tagged_sentences)
+
+    labeled_entities = {}
+    for stree in named_entities:
+        for subtree in stree.subtrees(filter=lambda t: len(t.label()) > 0):
+            node_type = subtree.label()
+            if node_type != NLTK_TREE_SENTENCE_LABEL:
+                name = " ".join(c[0] for c in subtree.leaves())
+                # print(str(type) + ": " + name)
+                entity_key = (node_type, name)
+                try:
+                    labeled_entities[entity_key] += 1
+                except:
+                    labeled_entities[entity_key] = 1
+
+    mylocation = ''
+    topgspgpe = ''
+    for w in sorted(labeled_entities, key=labeled_entities.get, reverse=True):
+        if labeled_entities[w] < 2:
+            break
+        t, v = w
+        print("   ", labeled_entities[w], w, " TYPE: ", t, "  ", v)
+        if t == "LOCATION":
+            mylocation = v
+        if mylocation == '' and topgspgpe == '' and (t == 'GSP' or t == 'GPE'):
+            topgspgpe = v
+    if mylocation == '':
+        mylocation = topgspgpe
+        if mylocation == '':
+            mylocation = 'undetected'
+    print("LOCATION: ", mylocation)
 
 
 def json_objects_from_file(filename):
